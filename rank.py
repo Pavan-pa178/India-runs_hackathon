@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import csv
 import gzip
@@ -17,9 +19,8 @@ DEFAULT_OUTPUT_FILE = DEFAULT_OUTPUT_DIR / "submission.csv"
 
 
 def find_default_candidates_path() -> Path:
-
-    plain = REPO_ROOT 
-    gzipped = REPO_ROOT 
+    plain = REPO_ROOT / "candidates.jsonl"
+    gzipped = REPO_ROOT / "candidates.jsonl.gz"
     if plain.exists():
         return plain
     if gzipped.exists():
@@ -64,7 +65,7 @@ def main():
 
     print("Redrob Ranker", file=sys.stderr)
 
-    print(f"Loading candidates: {candidates_path}", file=sys.stderr)
+    print(f"Loading candidate pool: {candidates_path}", file=sys.stderr)
     candidates = load_candidates(candidates_path)
     print(f"  {len(candidates)} candidates loaded.", file=sys.stderr)
 
@@ -74,8 +75,7 @@ def main():
     results = [score_candidate(c) for c in candidates]
     print(f"  {len(results)} candidates scored.", file=sys.stderr)
 
-   
-    print(f"Ranking and selecting top {TOP_N}", file=sys.stderr)
+    print(f"Ranking and selecting top {TOP_N}...", file=sys.stderr)
     results.sort(key=lambda r: (-r["final_score"], r["candidate_id"]))
     top = results[:TOP_N]
 
@@ -91,7 +91,6 @@ def main():
             "reasoning": reasoning,
         })
 
-   
     for i in range(len(rows) - 1):
         assert rows[i]["score"] >= rows[i + 1]["score"], (
             f"Score ordering violated at rank {i+1}->{i+2}: "
